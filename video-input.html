@@ -1,0 +1,154 @@
+
+<script type="text/html" data-template-name="video input">
+    <div class="form-row">
+        <label for="node-input-device-type"><i class="fa fa-tasks"></i><span> Device type</span></label>
+        <select id="node-input-device-type" style="width:200px !important">
+            <option value="local">Local camera</option>
+            <option value="rtsp">RTSP</option>
+        </select>
+    </div>
+
+    <div class="form-row" id="device-type-rtsp">
+        <label for="node-input-rtsp"><i class="fa fa-globe"></i><span> URL</span></label>
+        <input id="node-input-rtsp" type="text" placeholder="rtsp://">
+    </div>
+
+    <div class="form-row" id="device-type-local">
+        <label for="node-input-local"><i class="fa fa-camera"></i><span> Video</span></label>
+        <select id="node-input-local" style="width:200px !important">
+            <option value="video0">/dev/video0</option>
+            <option value="video1">/dev/video1</option>
+            <option value="video2">/dev/video2</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-resolution"><i class="fa fa-television"></i><span> Resolution</span></label>
+        <select id="node-input-resolution" style="width:200px !important">
+            <option value="320">320×240</option>
+            <option value="640">640×480</option>
+            <option value="800">800×600</option>
+            <option value="1280">1280×720</option>
+            <option value="1920">1920×1080</option>
+            <option value="2560">2560×1600</option>
+            <option value="3840">3840×2160</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-frequency"><i class="fa fa-refresh"></i> Frequency</label>
+        <input type="text" id="node-input-frequency" style="text-align:end; width:50px !important">
+        <span>HZ</span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    RED.nodes.registerType('video input', {
+        category: 'seeed recomputer',
+        color: "#028AFF",
+        defaults: {
+            name: { value: "" },
+            deviceType: {value:"local", required:true},
+            rtsp: { value: "", validate: function (v) { return (v.trim().length === 0) || (v.indexOf("://") === -1) || (v.trim().indexOf("rtsp") === 0) } },
+            local: { value: "video0" },
+            resolution: { value: "1280" },
+            frequency: { value: "10", required: true, validate: function (v) { return RED.validators.number(v) && (v >= 0); } },
+            senderr: { value: true },
+            active: { value: true },
+        },
+        inputs: 0,
+        outputs: 1,
+        outputLabels: function (i) {
+            return this._("image");
+        },
+        icon: "video_input.svg",
+        label: function () {
+            return this.name || "video input";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function () {
+            $("#node-input-frequency").spinner({ min: 1, max: 60 });
+
+            if (this.deviceType == "local") {
+                $("#node-input-device-type").val('local');
+            } else if (this.deviceType == "rtsp") {
+                $("#node-input-device-type").val('rtsp');
+            }
+
+            $("#node-input-device-type").on("change", function () {
+                if (this.value === "local") {
+                    $("#device-type-local").show();
+                    $("#device-type-rtsp").hide();
+                } else if (this.value === "rtsp") {
+                    $("#device-type-local").hide();
+                    $("#device-type-rtsp").show();
+                }
+            }).trigger("change");
+
+        },
+        oneditsave: function () {
+            var type = $("#node-input-device-type").val();
+            this.deviceType = type;
+        },
+        button: {
+            toggle: "active",
+            enabled: function () {
+                return !this.changed
+            },
+            onclick: function () {
+                if (this.changed) {
+                    this.active = false
+                    return RED.notify(RED._("notification.warning", { message: RED._("notification.warnings.undeployedChanges") }), "warning");
+                }
+
+                const label = this.name || "video input";
+                var node = this;
+                $.ajax({
+                    url: `video-input/${this.id}/${this.active ? 'enable' : 'disable'}`,
+                    type: "POST",
+                    success: function (resp, textStatus, xhr) {
+                        const historyEvent = {
+                            t: 'edit',
+                            node: node,
+                            changes: {
+                                active: !node.active
+                            },
+                            dirty: node.dirty,
+                            changed: node.changed
+                        };
+                        // node.changed = true;
+                        node.dirty = true;
+                        RED.nodes.dirty(true);
+                        RED.history.push(historyEvent);
+                        RED.view.redraw();
+                        if (xhr.status == 200) {
+                            RED.notify("Successfully " + resp + ": " + label, "success");
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        var message;
+
+                        switch (jqXHR.status) {
+                            case 404:
+                                message = "node not deployed";
+                                break;
+                            case 0:
+                                message = "no response from server";
+                                break;
+                            default:
+                                message = `unexpected error (${textStatus}) ${errorThrown}`;
+                        }
+
+                        RED.notify(`<strong>Error</strong>: ${message}`, "error");
+                    }
+                });
+            }
+        },
+    });
+</script>

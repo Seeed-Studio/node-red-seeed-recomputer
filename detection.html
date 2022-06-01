@@ -1,0 +1,58 @@
+
+<script type="text/html" data-template-name="detection">
+    <div class="form-row">
+        <label for="node-input-model-name"><i class="fa fa-database"></i><span> Model name</span></label>
+        <select id="node-input-model-name" style="width:200px !important">
+            <option value="coco_dataset">COCO dataset</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label> </label>
+        <input type="checkbox" id="node-input-show-result" style="display: inline-block; width:auto; vertical-align:top;">
+        <label for="node-input-show-result" style="width:auto">Show result</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+<!-- <script type="text/html" data-help-name="detection">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script> -->
+<script type="text/javascript">
+    RED.nodes.registerType('detection', {
+        category: 'seeed recomputer',
+        color: "#028AFF",
+        defaults: {
+            name: { value: "" },
+            modelName: {value:"coco_dataset", required:true},
+            showResult: { value: true },
+            senderr: { value: true }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: function (i) {
+            return [
+                this._("image"),
+                this._("predict JSON object"),
+            ][i];
+        },
+        icon: "detection.svg",
+        label: function () {
+            return this.name || "object detection";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function () {
+            $('#node-input-show-result').prop('checked', this.showResult);
+        },
+        oneditsave: function () {
+            var model = $("#node-input-model-name").val();
+            this.modelName = model;
+
+            var showResult = $("#node-input-show-result").is(':checked');
+            this.showResult = showResult;
+        }
+    });
+</script>

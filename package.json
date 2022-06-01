@@ -1,0 +1,33 @@
+{
+  "name": "node-red-seeed-recomputer",
+  "version": "1.0.0",
+  "description": "Seeed reComputer AI",
+  "keywords": [
+    "node-red",
+    "seeed",
+    "recomputer"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "chenwenhao",
+  "license": "MIT",
+  "node-red": {
+    "nodes": {
+      "video input": "video-input.js",
+      "detection": "detection.js",
+      "video view": "video-view.js"
+    }
+  },
+  "dependencies": {
+    "cookie": "0.4.2",
+    "form-data": "4.0.0",
+    "got": "11.8.3",
+    "hash-sum": "2.0.0",
+    "hpagent": "0.1.2",
+    "jimp-compact": "~0.10.1",
+    "mustache": "4.2.0",
+    "tough-cookie": "4.0.0",
+    "uuid": "8.3.2"
+  }
+}
