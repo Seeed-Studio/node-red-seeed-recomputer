@@ -30,12 +30,13 @@
             senderr: { value: true }
         },
         inputs: 1,
-        outputs: 2,
+        outputs: 1,
         outputLabels: function (i) {
-            return [
-                this._("image"),
-                this._("predict JSON object"),
-            ][i];
+            return "predict image and JSON object";
+            // return [
+            //     this._("image"),
+            //     this._("predict JSON object"),
+            // ][i];
         },
         icon: "detection.svg",
         label: function () {

@@ -1,6 +1,6 @@
 {
   "name": "node-red-seeed-recomputer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Seeed reComputer AI",
   "keywords": [
     "node-red",

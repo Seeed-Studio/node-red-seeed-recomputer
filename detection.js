@@ -316,7 +316,11 @@ in your Node-RED user directory (${RED.settings.userDir}).
                     var boxjson = {}
                     try { boxjson = JSON.parse(boxstr); } // obj
                     catch (e) { node.warn(RED._("JSON parse error")); }
-                    nodeSend([{ payload: msg.payload }, { payload: boxjson }]); 
+                    // nodeSend([{ payload: msg.payload }, { payload: boxjson }]);
+                    nodeSend({ payload: {
+                        image: msg.payload,
+                        result: boxjson
+                    }});
                 }
                 node.status({});
                 nodeDone();
